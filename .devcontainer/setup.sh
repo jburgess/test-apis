@@ -6,6 +6,9 @@ echo "================================================"
 echo "Setting up test-apis development environment"
 echo "================================================"
 
+# Ensure gradlew has execute permissions
+chmod +x gradlew
+
 # Display Java version
 echo ""
 echo "Java version:"
