@@ -9,19 +9,6 @@ echo "================================================"
 # Ensure gradlew has execute permissions
 chmod +x gradlew
 
-# Configure Git to use GitHub CLI for authentication
-echo ""
-echo "Configuring Git authentication..."
-if command -v gh &> /dev/null && [ -n "$GITHUB_TOKEN" ]; then
-    # Configure Git credential helper to use GitHub CLI
-    git config --global credential.helper ""
-    git config --global credential.helper "!gh auth git-credential"
-    echo "✓ Git configured to use GitHub CLI authentication"
-else
-    echo "⚠️  GitHub CLI or GITHUB_TOKEN not available"
-    echo "   Schemas from private repositories may fail to fetch"
-fi
-
 # Display Java version
 echo ""
 echo "Java version:"

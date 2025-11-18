@@ -5,10 +5,6 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "installDirectlyFromGitHubRelease": true,
-      "version": "latest"
     }
   },
 
@@ -24,6 +20,15 @@
         "java.configuration.updateBuildConfiguration": "automatic",
         "java.home": "/usr/local/sdkman/candidates/java/current",
         "gradle.nestedProjects": true
+      },
+      "codespaces": {
+        "repositories": {
+          "jburgess/test-schemas": {
+            "permissions": {
+              "contents": "read"
+            }
+          }
+        }
       }
     }
   },
@@ -36,9 +41,5 @@
 
   "mounts": [
     "source=${localWorkspaceFolder}/.gradle,target=/home/vscode/.gradle,type=bind,consistency=cached"
-  ],
-
-  "containerEnv": {
-    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
-  }
+  ]
 }

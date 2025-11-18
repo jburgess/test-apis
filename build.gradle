@@ -37,12 +37,11 @@ tasks.register('fetchSchemas') {
                 logger.lifecycle("Fetching schemas ${gitTag} -> schemas/${dirName}...")
 
                 // Build the Git URL with authentication if GITHUB_TOKEN is available
+                // This supports both Codespaces (with permissions config) and CI/CD
                 def gitUrl = schemaRepo
                 def githubToken = System.getenv('GITHUB_TOKEN')
                 if (githubToken) {
-                    // Use token in URL for authentication
                     gitUrl = schemaRepo.replace('https://github.com/', "https://x-access-token:${githubToken}@github.com/")
-                    logger.lifecycle("Using GITHUB_TOKEN for authentication")
                 }
 
                 // Use ProcessBuilder to execute git clone
