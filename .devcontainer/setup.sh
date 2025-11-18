@@ -45,14 +45,13 @@ echo ""
 echo "Fetching schemas from test-schemas repository..."
 ./gradlew fetchSchemas || {
     echo ""
-    echo "⚠️  Warning: Schema fetch failed. You may need to configure Git credentials."
-    echo "   This is normal if the test-schemas repository is private."
+    echo "⚠️  Warning: Schema fetch failed!"
     echo ""
-    echo "   To configure authentication:"
-    echo "   1. For HTTPS: git config --global credential.helper store"
-    echo "   2. For SSH: Add your SSH key to GitHub"
+    echo "Running diagnostics..."
     echo ""
-    echo "   Then run: ./gradlew fetchSchemas"
+    bash .devcontainer/check-access.sh
+    echo ""
+    echo "After resolving access issues, run: ./gradlew fetchSchemas"
     echo ""
     exit 0
 }
