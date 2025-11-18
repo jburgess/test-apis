@@ -6,21 +6,38 @@ echo "================================================"
 echo "Setting up test-apis development environment"
 echo "================================================"
 
-# Display Java and Gradle versions
+# Display Java version
 echo ""
 echo "Java version:"
 java -version
 
+# Check if Gradle is available
 echo ""
-echo "Gradle version:"
+if command -v gradle &> /dev/null; then
+    echo "System Gradle version:"
+    gradle --version
+else
+    echo "Using Gradle Wrapper (no system Gradle installed)"
+fi
+
+echo ""
+echo "Project Gradle Wrapper version:"
 ./gradlew --version
 
 # Fetch schemas automatically
 echo ""
 echo "Fetching schemas from test-schemas repository..."
 ./gradlew fetchSchemas || {
+    echo ""
     echo "⚠️  Warning: Schema fetch failed. You may need to configure Git credentials."
-    echo "   Run './gradlew fetchSchemas' manually after configuring authentication."
+    echo "   This is normal if the test-schemas repository is private."
+    echo ""
+    echo "   To configure authentication:"
+    echo "   1. For HTTPS: git config --global credential.helper store"
+    echo "   2. For SSH: Add your SSH key to GitHub"
+    echo ""
+    echo "   Then run: ./gradlew fetchSchemas"
+    echo ""
     exit 0
 }
 

@@ -5,9 +5,6 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/gradle:1": {
-      "version": "9.2.1"
     }
   },
 
