@@ -1,0 +1,39 @@
+{
+  "name": "Test APIs - Java 21",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/gradle:1": {
+      "version": "9.2.1"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.home": "/usr/local/sdkman/candidates/java/current",
+        "gradle.nestedProjects": true
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  "forwardPorts": [],
+
+  "remoteUser": "vscode",
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.gradle,target=/home/vscode/.gradle,type=bind,consistency=cached"
+  ]
+}

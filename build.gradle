@@ -1,0 +1,132 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Schema management configuration
+def schemaRepo = 'https://github.com/jburgess/test-schemas.git'
+
+// Map of Git tags to local directory names
+// Key: Git tag name, Value: Local directory name under schemas/
+def schemaVersionMap = [
+    'v1.0.0': 'v1.0.0',
+    'v1.1.0': 'v1.1.0'
+]
+
+tasks.register('fetchSchemas') {
+    description = 'Fetch test schemas from GitHub at specified versions'
+    group = 'build setup'
+
+    doLast {
+        schemaVersionMap.each { gitTag, dirName ->
+            def targetDir = file("schemas/${dirName}")
+
+            if (!targetDir.exists()) {
+                logger.lifecycle("Fetching schemas ${gitTag} -> schemas/${dirName}...")
+
+                // Use ProcessBuilder to execute git clone
+                def process = new ProcessBuilder(
+                    'git', 'clone',
+                    '--depth', '1',
+                    '--branch', gitTag,
+                    '--single-branch',
+                    schemaRepo,
+                    targetDir.path
+                ).redirectErrorStream(true).start()
+
+                process.inputStream.eachLine { logger.lifecycle(it) }
+                process.waitFor()
+
+                if (process.exitValue() != 0) {
+                    throw new GradleException("Failed to clone schemas ${gitTag}")
+                }
+
+                // Remove .git directory to save space and avoid confusion
+                delete file("${targetDir}/.git")
+
+                logger.lifecycle("✓ Schemas ${gitTag} fetched successfully to schemas/${dirName}")
+            } else {
+                logger.lifecycle("✓ Schemas ${dirName} already present")
+            }
+        }
+    }
+}
+
+tasks.register('cleanSchemas') {
+    description = 'Remove fetched schemas (forces re-fetch on next build)'
+    group = 'build setup'
+
+    doLast {
+        def schemasDir = file('schemas')
+        if (schemasDir.exists()) {
+            delete schemasDir
+            logger.lifecycle('Schemas directory removed')
+        } else {
+            logger.lifecycle('Schemas directory does not exist (already clean)')
+        }
+    }
+}
+
+tasks.register('refreshSchemas') {
+    description = 'Force refresh all schemas (clean + fetch)'
+    group = 'build setup'
+
+    dependsOn 'cleanSchemas', 'fetchSchemas'
+}
+
+// Ensure cleanSchemas runs before fetchSchemas
+tasks.named('fetchSchemas') {
+    mustRunAfter 'cleanSchemas'
+}
+
+// Automatically fetch schemas before compilation
+tasks.named('compileJava').configure {
+    dependsOn tasks.named('fetchSchemas')
+}
+
+// Clean schemas when running clean
+tasks.named('clean').configure {
+    dependsOn tasks.named('cleanSchemas')
+}
+
+// Documentation task
+tasks.register('schemaInfo') {
+    description = 'Display schema version information'
+    group = 'help'
+
+    doLast {
+        logger.lifecycle('')
+        logger.lifecycle('Schema Management Configuration')
+        logger.lifecycle('================================')
+        logger.lifecycle("Repository: ${schemaRepo}")
+        logger.lifecycle("Schema Mappings:")
+        logger.lifecycle('')
+        logger.lifecycle('Available tasks:')
+        logger.lifecycle('  ./gradlew fetchSchemas   - Fetch schemas if not present')
+        logger.lifecycle('  ./gradlew cleanSchemas   - Remove all schemas')
+        logger.lifecycle('  ./gradlew refreshSchemas - Clean and re-fetch all schemas')
+        logger.lifecycle('  ./gradlew schemaInfo     - Display this information')
+        logger.lifecycle('')
+        logger.lifecycle('Tag -> Directory Mappings:')
+        logger.lifecycle('─────────────────────────────')
+
+        schemaVersionMap.each { gitTag, dirName ->
+            def targetDir = file("schemas/${dirName}")
+            def status = targetDir.exists() ? '✓ Present' : '✗ Not fetched'
+            logger.lifecycle("  ${gitTag.padRight(15)} -> schemas/${dirName.padRight(15)} ${status}")
+        }
+        logger.lifecycle('')
+    }
+}
