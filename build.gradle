@@ -36,13 +36,22 @@ tasks.register('fetchSchemas') {
             if (!targetDir.exists()) {
                 logger.lifecycle("Fetching schemas ${gitTag} -> schemas/${dirName}...")
 
+                // Build the Git URL with authentication if GITHUB_TOKEN is available
+                def gitUrl = schemaRepo
+                def githubToken = System.getenv('GITHUB_TOKEN')
+                if (githubToken) {
+                    // Use token in URL for authentication
+                    gitUrl = schemaRepo.replace('https://github.com/', "https://x-access-token:${githubToken}@github.com/")
+                    logger.lifecycle("Using GITHUB_TOKEN for authentication")
+                }
+
                 // Use ProcessBuilder to execute git clone
                 def process = new ProcessBuilder(
                     'git', 'clone',
                     '--depth', '1',
                     '--branch', gitTag,
                     '--single-branch',
-                    schemaRepo,
+                    gitUrl,
                     targetDir.path
                 ).redirectErrorStream(true).start()
 
